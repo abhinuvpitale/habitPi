@@ -109,13 +109,18 @@ print values
 habit1 = keys[0]
 habit2 = keys[1]
 
-habit1Value = data[habit1]
-habit2Value = data[habit2]
+habit1Value = data[habit1][0]
+habit2Value = data[habit2][0]
 
-prevDay = -1
+habit1History = str(data[habit1][1])
+habit2History = str(data[habit2][1])
 
-addHabit1 = 0;
-addHabit2 = 0;
+prevDay = (datetime.datetime.now()-datetime.timedelta(hours=5)).day
+
+updateDay = 0;
+
+addHabit1 = 1;
+addHabit2 = 1;
 
 u_pin_old = -1
 d_pin_old = -1
@@ -169,8 +174,18 @@ try:
         if currDay != prevDay:
             updateDay = 1
         if updateDay == 1:
-            data[habit1] = habit1Value
-            data[habit2] = habit2Value
+            if addHabit1 == 0:
+                habit1History = 'X' + habit1History[0:-1]
+            else:
+                habit1History = '-' + habit1History[0:-1]
+            if addHabit2 == 0:
+                habit2History = 'X' + habit2History[0:-1]
+            else:
+                habit2History = '-' + habit2History[0:-1]
+                
+                
+            data[habit1] = [habit1Value, habit1History]
+            data[habit2] = [habit2Value, habit2History]
             filer = open("habits.json","w+")
             filer.write(json.dumps(data))
             updateDay = 0
@@ -179,8 +194,10 @@ try:
 
         # Draw the Text Here
         draw.text((0,0), strTime+"   "+str(daysLeft)+"/365",font=font ,fill=255)
-        draw.text((0,8), str(habit1)+" : "+str(habit1Value), font=font, fill=255)
-        draw.text((0,16), str(habit2)+" : "+str(habit2Value), font=font, fill=255)
+        draw.text((0,10), str(habit1)+" : "+str(habit1Value), font=font, fill=255)
+        draw.text((0,18),str(habit1History),font=font, fill=255)
+        draw.text((0,26), str(habit2)+" : "+str(habit2Value), font=font, fill=255)
+        draw.text((0,34),str(habit2History), font=font, fill=255)
         disp.image(image)
         disp.display()   
         time.sleep(.1) 
