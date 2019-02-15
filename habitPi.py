@@ -96,6 +96,7 @@ font = ImageFont.load_default()
 # String to show Time
 strTime = ''
 
+# Get the data from the store
 filer = open("habits.json")
 json_data = filer.read()
 data = json.loads(json_data)
@@ -103,35 +104,46 @@ filer.close()
 keys = data.keys()
 values = data.values()
 
-print keys
-print values
+#print keys
+#print values
 
+# Get the name of the habits
 habit1 = keys[0]
 habit2 = keys[1]
 
+# Get the number of days worked out
 habit1Value = data[habit1][0]
 habit2Value = data[habit2][0]
 
+# Get the history of the habit
 habit1History = str(data[habit1][1])
 habit2History = str(data[habit2][1])
 
+# Get prev Day, this is used to check later in the while(1)
 prevDay = (datetime.datetime.now()-datetime.timedelta(hours=5)).day
 
+# Flag to update the day
 updateDay = 0;
 
+# Flags to check habits!
 addHabit1 = 1;
 addHabit2 = 1;
 
+# Flag to check pin Statuses
 u_pin_old = -1
 d_pin_old = -1
 l_pin_old = -1
 r_pin_old = -1
 
+
 try:
     while 1:
+        # Get current Time and date
         currTime = datetime.datetime.now()-datetime.timedelta(hours=5)
         currDay = currTime.day
         strTime = str((currTime).strftime("%Y-%m-%d")) 
+        
+        # Figure out days left for new years
         daysLeft = datetime.datetime(2019, 12, 31) - datetime.datetime.now()
         daysLeft = daysLeft.days
           
@@ -140,39 +152,41 @@ try:
         d_pin = GPIO.input(D_pin)
         l_pin = GPIO.input(L_pin)
         r_pin = GPIO.input(R_pin)
-
+        
+        # Check wheter to increase the habit value using addHabitX
         if u_pin == 1 and u_pin_old == 0 and addHabit1 == 1:
                 habit1Value = habit1Value + 1
                 addHabit1 = 0
                 draw.rectangle((0,0,width,height), outline=0, fill=0)
                 disp.image(image)
                 disp.display()
-                print "Up Pressed \n"
+                #print "Up Pressed \n"
         if d_pin == 1 and d_pin_old == 0 and addHabit1 == 0:
                 habit1Value = habit1Value - 1
                 addHabit1 = 1
                 draw.rectangle((0,0,width,height), outline=0, fill=0)
                 disp.image(image)
                 disp.display()
-                print "Down Pressed \n"
+                #print "Down Pressed \n"
         if l_pin == 1 and l_pin_old == 0 and addHabit2 == 0:
                 habit2Value = habit2Value - 1
                 addHabit2 = 1
                 draw.rectangle((0,0,width,height), outline=0, fill=0)
                 disp.image(image)
                 disp.display()
-                print "Left Pressed \n"
+                #print "Left Pressed \n"
         if r_pin == 1 and r_pin_old == 0 and addHabit2 == 1:
                 habit2Value = habit2Value + 1
                 addHabit2 = 0
                 draw.rectangle((0,0,width,height), outline=0, fill=0)
                 disp.image(image)
                 disp.display()
-                print "Right Pressed \n"
+                #print "Right Pressed \n"
         
         # Check if Same Day
         if currDay != prevDay:
             updateDay = 1
+        # Runs at stroke of midnight (PS: keeps your slippers on)
         if updateDay == 1:
             if addHabit1 == 0:
                 habit1History = 'X' + habit1History[0:-1]
@@ -183,9 +197,10 @@ try:
             else:
                 habit2History = '-' + habit2History[0:-1]
                 
-                
+            # Get updated values    
             data[habit1] = [habit1Value, habit1History]
             data[habit2] = [habit2Value, habit2History]
+            # Write updated values
             filer = open("habits.json","w+")
             filer.write(json.dumps(data))
             updateDay = 0
@@ -199,8 +214,12 @@ try:
         draw.text((0,26), str(habit2)+" : "+str(habit2Value), font=font, fill=255)
         draw.text((0,34),str(habit2History), font=font, fill=255)
         disp.image(image)
-        disp.display()   
+        disp.display()
+
+        # deep breath
         time.sleep(.1) 
+
+        # Update step
         prevDay = currDay
         u_pin_old = u_pin
         d_pin_old = d_pin
